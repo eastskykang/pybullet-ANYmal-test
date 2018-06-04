@@ -8,45 +8,78 @@ p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
 p.setGravity(0,0,-9.81)
 
 # sim engine parameters
-p.setPhysicsEngineParameter(fixedTimeStep=0.005,
+p.setPhysicsEngineParameter(fixedTimeStep=0.0005,
                             erp=0.0,
                             contactERP=0.0,
                             frictionERP=0.0,
                             restitutionVelocityThreshold=0.0)
 
-planeId = p.loadURDF("res/plane.urdf")
+# True/False
+isPlaneFromURDF = False
+
+if isPlaneFromURDF:
+    # plane from urdf
+    planeId = p.loadURDF("res/plane.urdf",
+                         useMaximalCoordinates=0,       # maxco disabled. since it's not supported in C++ API
+                         flags=p.URDF_USE_INERTIA_FROM_FILE)
+else:
+    # plane from createmultibody
+    planeShapeId = p.createCollisionShape(shapeType=p.GEOM_BOX,
+                                          halfExtents=[20, 20, 0.05])
+
+    planeId = p.createMultiBody(baseMass=0,
+                                baseCollisionShapeIndex=planeShapeId,
+                                basePosition=[0., 0., -0.05],
+                                baseOrientation=p.getQuaternionFromEuler([0, 0, 0]),
+                                useMaximalCoordinates=0,  # maxco disabled. since it's not supported in C++ API
+                                )
+
 p.changeDynamics(bodyUniqueId=planeId,
                  linkIndex=-1,
                  lateralFriction=0.0,
                  rollingFriction=0.0,
                  spinningFriction=0.0,
+                 linearDamping=0,
+                 angularDamping=0,
+                 mass=0,
+                 localInertiaDiagonal=[0, 0, 0],
                  restitution=1.0)
 
-# variables
-numrow = 7
-robotIds = []
+# ball from URDF
+ballId = p.loadURDF("res/ball.urdf",
+                    basePosition=[-1., 0., 5.],
+                    baseOrientation=p.getQuaternionFromEuler([0, 0, 0]),
+                    useMaximalCoordinates=0,  # maxco disabled. since it's not supported in C++ API
+                    flags=p.URDF_USE_INERTIA_FROM_FILE)
 
-# robot load
-for i in range(0, numrow):
-    for j in range(0, numrow):
-        startPos = [(i- numrow * 0.5) *  2.0 , (j - numrow * 0.5)* 2.0, 5.0]
-        startOrientation = p.getQuaternionFromEuler([0, 0, 0])
+p.changeDynamics(bodyUniqueId=ballId,
+                 linkIndex=-1,
+                 lateralFriction=0.0,
+                 rollingFriction=0.0,
+                 spinningFriction=0.0,
+                 linearDamping=0,
+                 angularDamping=0,
+                 restitution=1.0)
 
-        robotId = p.loadURDF("res/ball.urdf",
-                             startPos,
-                             startOrientation,
-                             useMaximalCoordinates=1,
-                             flags=p.URDF_USE_INERTIA_FROM_FILE)
+# ball from create multibody
+ballShapeId = p.createCollisionShape(shapeType=p.GEOM_SPHERE,
+                                     radius=0.1)
 
-        p.changeDynamics(bodyUniqueId=planeId,
-                         linkIndex=-1,
-                         lateralFriction=0.0,
-                         rollingFriction=0.0,
-                         spinningFriction=0.0,
-                         restitution=1.0)
+ballId2 = p.createMultiBody(baseMass=10,
+                            baseCollisionShapeIndex=ballShapeId,
+                            basePosition=[1., 0., 5.],
+                            baseOrientation=p.getQuaternionFromEuler([0, 0, 0]),
+                            useMaximalCoordinates=0,  # maxco disabled. since it's not supported in C++ API
+                            )
 
-        robotIds.append(robotId)
-
+p.changeDynamics(bodyUniqueId=ballId2,
+                 linkIndex=-1,
+                 lateralFriction=0.0,
+                 rollingFriction=0.0,
+                 spinningFriction=0.0,
+                 linearDamping=0,
+                 angularDamping=0,
+                 restitution=1.0)
 
 # simulation step
 for t in range (10000):
