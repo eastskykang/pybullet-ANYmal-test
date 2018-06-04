@@ -7,7 +7,7 @@ physicsClient = p.connect(p.GUI)#or p.DIRECT for non-graphical version
 p.setAdditionalSearchPath(pybullet_data.getDataPath()) #optionally
 p.setGravity(0,0,-9.81)
 
-# sim engine parameters
+# engine parameters
 p.setPhysicsEngineParameter(fixedTimeStep=0.005,
                             numSolverIterations=50,
                             erp=0.2,
@@ -64,7 +64,7 @@ for i in range(0, numrow):
                                     forces=zeros)
 
 
-# gains
+# gains (DO NOT CHANGE!)
 kp = 40
 kd = 1.0
 
@@ -89,8 +89,6 @@ for t in range (10000):
     # simulation step
     p.stepSimulation()
     time.sleep(1./240.)
-    info = p.getContactPoints()
+    # info = p.getContactPoints()
 
-cubePos, cubeOrn = p.getBasePositionAndOrientation(robotId)
-print(cubePos,cubeOrn)
 p.disconnect()
